@@ -32,17 +32,11 @@ N_FEF = 5;  % num FEF nodes
 V1  = zeros(N_V1,1);
 FEF = zeros(N_FEF,1);
 
-%% Define V1 node-types
-% Six types (see paper for details):
-%   - TE (tuned excitatory)
-%   - TI (tuned inhibitory)
-%   - TN (tuned near)
-%   - TF (tuned far)
-%   - FA (far)
-%   - NE (near)
+%% Define and activate disparity-tuned V1 nodes
 
+% tuning functions for V1 nodes
     function a = tuneNF(A1, A2, A3, si, sigma)
-       % Tuning function for Near & Far (NE, TN, FA, TF) nodes.
+       % Tuning function for Near & Far (NE, TN, FA, TF) V1 nodes.
        % Takes inputs: 
        %    - A1 (height of first gaussian)
        %    - A2 (height of second gaussian)
@@ -56,7 +50,7 @@ FEF = zeros(N_FEF,1);
        a = A1*exp(arg1) - A2*exp(arg2) + A3;
     end
     function a = tuneTE(A1, A2, si, sigma)
-       % Tuning function for TE nodes.
+       % Tuning function for TE V1 nodes.
        % Takes inputs: 
        %    - A1 (height of gaussian)
        %    - si (preffered disparity for node i)
@@ -69,13 +63,10 @@ FEF = zeros(N_FEF,1);
 
 % set cell types and preffered disparities
 
-div = idivide(N_V1, int32(3), 'floor');     % group sizes for cell types
-div = double(div);
+div = double(idivide(N_V1, int32(3), 'floor'));     % group sizes for cell types
+nNear = div; nFar = div; nZero = N_V1-2*div; 
 
-nNear = div;
-nFar  = div;
-nZero = N_V1-2*div; 
-
+% locations of cell types in V1
 nearCells = linspace(1, div, nNear);
 farCells  = linspace(div+1, 2*div, nFar);
 zeroCells = linspace(2*div+1, N_V1, nZero);
@@ -88,25 +79,64 @@ zeroDisp = linspace(-1.5, 1.5, nZero);    % for TE nodes
 
 % update near cells
 for i = 1:nNear
-    V1(nearCells(i)) = tuneNF(1, 1, 0.2, nearDisp(i), 3);    % tuneNF(A1, A2, A3, si, sigma)
+    % tuneNF(A1, A2, A3, si, sigma)
+    V1(nearCells(i)) = tuneNF(0.8, 0.8, 0.2, nearDisp(i), abs(nearDisp(i)) );
 end
 
 % update far cells
 for i = 1:nFar
-    V1(farCells(i)) = tuneNF(1, 1, 0.2, farDisp(i), 3);     % tuneNF(A1, A2, A3, si, sigma)
+    % tuneNF(A1, A2, A3, si, sigma)
+    V1(farCells(i)) = tuneNF(0.8, 0.8, 0.2, farDisp(i), abs(farDisp(i)) );
 end
 
 % update zero cells
 for i = 1:nZero
-    V1(zeroCells(i)) = tuneTE(1, 0.2, zeroDisp(i), 3);          % tuneTE(A1, A2, si, sigma)
+    % tuneTE(A1, A2, si, sigma)
+    V1(zeroCells(i)) = tuneTE(0.8, 0.2, zeroDisp(i), abs(zeroDisp(i)) ); 
 end
+
+
+%% Define and activate vergence-tuned FEF nodes
+
+    function z = tuneV(vi, T)
+        % Tuning function for all FEF nodes
+        % Takes inputs:
+        %   - v (vergence, scalar)
+        %   - vi (preferred vergence of node i, scalar)
+        %   - T (slope of curve)
+        
+        z = 1 / (  1 + exp( -(v - vi) / T )  );
+    end
+
+verg  = linspace(5, 25, N_FEF);     % preferred vergences for FEF nodes
+slope = linspace(0.1, 5, N_FEF); 
+
+for i = 1:N_FEF
+    % tuneV(vi, T)
+    FEF(i) = tuneV(verg(i), 1); 
+end
+
+
+
+
 
 
 %% MT integration
 MT = V1 * FEF';
 
-%% DEBUGGING
-D = V1(v);     % currently returns a scalar of activity of one cell
+
+
+
+
+%% DEBUGGING (w/ testScript.m)
+
+% begin:    DISPARITY-TEST
+D = V1(v);     % returns a scalar of activity of V1 node v (second inarg)
+% end:      DISPARITY-TEST
+
+% begin:    VERGENCE-TEST
+%D = FEF(s);     % returns a scalar of activity of FEF node s (first inarg)
+% end:      VERGENCE-TEST
 
 
 % return D
