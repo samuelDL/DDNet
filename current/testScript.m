@@ -64,14 +64,17 @@ N  = nR*nC; % number of plots
 
 disp = linspace(-4, 4, N);
 verg = linspace(5, 25, N);
+verg(:) = 15;
 
 figure('units','normalized','outerposition',[0 0 1 1]); 
+title('Simulated MT disparity-vergence tuned response')
 k = 1;  % counter for plot number
 for i = 1:nR 
     for j = 1:nC 
         subplot(nR, nC, k);
         surf( distMod(disp(k),verg(k)) ); 
-        str = sprintf('d = %d, v = %d', int32(disp(k)), int32(verg(k))); title(str)
+        str = sprintf('d = %d, v = %d', int32(disp(k)), int32(verg(k))); 
+        title(str); xlabel('vergence'); ylabel('disparity');
         k = k + 1; 
     end
 end

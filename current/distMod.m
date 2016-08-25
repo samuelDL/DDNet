@@ -109,6 +109,7 @@ end
         z = 1 / (  1 + exp( -(v - vi) / T )  );
     end
 
+% set parameters for each node
 thresh  = linspace(5, 25, N_FEF);       % thresholds
 slope   = linspace(4, 5, N_FEF);        % slopes
 
@@ -145,7 +146,7 @@ end
 % end:      VERGENCE-TEST
 
 % begin:    MT-TEST
-%D = MT;         % returns N_V1 x N_FEF matrix containing all MT node values
+D = MT;         % returns N_V1 x N_FEF matrix containing all MT node values
 % end:      MT-TEST
 
 
