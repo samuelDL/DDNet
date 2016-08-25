@@ -54,10 +54,69 @@ hold off;
 
 
 
-%% 
-for i = 1: 100
-   out(i) = 1 /
+%% MT-TEST
+
+clear; clc; close all;
+
+nR = 3;     % rows of subplot
+nC = 4;     % columns of subplot 
+N  = nR*nC; % number of plots
+
+disp = linspace(-4, 4, N);
+verg = linspace(5, 25, N);
+
+figure('units','normalized','outerposition',[0 0 1 1]); 
+k = 1;  % counter for plot number
+for i = 1:nR 
+    for j = 1:nC 
+        subplot(nR, nC, k);
+        surf( distMod(disp(k),verg(k)) ); 
+        str = sprintf('d = %d, v = %d', int32(disp(k)), int32(verg(k))); title(str)
+        k = k + 1; 
+    end
 end
+
+
+
+
+%% Testing distance and parameter equations
+
+clear; clc; close all;
+
+% eq(1) from Qian & Yazdanbakhsh, 2015
+distance =@(I,d,v) I ./ ( 2*tan((v-d) ./ 2) );    
+
+% eq(1) solved for v
+vergence =@(D,I,d) 2 * (tan( I ./ (2 * D) )).^-1 + d; 
+
+% eq(1) solved for d
+disparity =@(D,I,v) -2 * (tan( I ./ (2 * D) )).^-1 + v; 
+
+
+I = 6 * 10^-3;          % interocular distance in meters
+
+v = 10;
+d = linspace(-4,4,100);
+
+D = distance(I,d,v);
+
+plot(D); hold on; plot(d); legend('Distance','Disparity');
+
+
+%% DISTANCE FINAL TEST
+
+clear; clc; 
+
+D = distMod(-4, 20);
+disp(D)
+
+
+
+
+
+
+
+
 
 
 

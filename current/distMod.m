@@ -4,7 +4,7 @@ function D = distMod(s, v)
 %   author  : Samuel Lee (samuell@bu.edu)
 %   date    : 8/12/16
 %
-%   description: The Distance Module for a Distance-Dependent neural
+%   Description: The Distance Module for a Distance-Dependent neural
 %   network. 
 %
 %   Takes inputs:
@@ -14,7 +14,7 @@ function D = distMod(s, v)
 %   Outputs:
 %       - D (distance, scalar)
 %
-%   credit: Network architecture is based on the paper "A Neural Model of
+%   Credit: Network architecture is based on the paper "A Neural Model of
 %   Distance-Dependent Percept of Object Size Constancy" (Qian &
 %   Yazdanbakhsh, 2015).
 %
@@ -63,7 +63,8 @@ FEF = zeros(N_FEF,1);
 
 % set cell types and preffered disparities
 
-div = double(idivide(N_V1, int32(3), 'floor'));     % group sizes for cell types
+% group sizes for cell types
+div = double(idivide(N_V1, int32(3), 'floor'));
 nNear = div; nFar = div; nZero = N_V1-2*div; 
 
 % locations of cell types in V1
@@ -108,36 +109,44 @@ end
         z = 1 / (  1 + exp( -(v - vi) / T )  );
     end
 
-verg  = linspace(5, 25, N_FEF);     % preferred vergences for FEF nodes
-slope = linspace(0.1, 5, N_FEF); 
+thresh  = linspace(5, 25, N_FEF);       % thresholds
+slope   = linspace(4, 5, N_FEF);        % slopes
 
 for i = 1:N_FEF
     % tuneV(vi, T)
-    FEF(i) = tuneV(verg(i), 1); 
+    FEF(i) = tuneV(thresh(i), slope(i)); 
 end
-
-
-
-
 
 
 %% MT integration
 MT = V1 * FEF';
 
 
+%% LIP distance estimation via linear combination
 
+w = ones(N_V1, N_FEF);  % weights from connections from MT to LIP
+
+D = 0.0;
+for i = 1:N_V1
+    for j = 1:N_FEF
+        D = D + w(i,j) * MT(i,j); 
+    end
+end
 
 
 %% DEBUGGING (w/ testScript.m)
 
 % begin:    DISPARITY-TEST
-D = V1(v);     % returns a scalar of activity of V1 node v (second inarg)
+%D = V1(v);     % returns a scalar of activity of V1 node v (second inarg)
 % end:      DISPARITY-TEST
 
 % begin:    VERGENCE-TEST
 %D = FEF(s);     % returns a scalar of activity of FEF node s (first inarg)
 % end:      VERGENCE-TEST
 
+% begin:    MT-TEST
+%D = MT;         % returns N_V1 x N_FEF matrix containing all MT node values
+% end:      MT-TEST
 
-% return D
+
 end
