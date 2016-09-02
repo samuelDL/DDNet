@@ -18,7 +18,6 @@ function D = distMod(s, v)
 %   Distance-Dependent Percept of Object Size Constancy" (Qian &
 %   Yazdanbakhsh, 2015).
 %
-%   LAST MODIFED: 8/19/16 16:00
 
 %% Initialize nodes
 % V1 (n = 40)
@@ -125,12 +124,12 @@ MT = V1 * FEF';
 
 %% LIP distance estimation via linear combination
 
-w = ones(N_V1, N_FEF);  % weights from connections from MT to LIP
+W = ones(N_V1, N_FEF);  % weights from connections from MT to LIP
 
 D = 0.0;
 for i = 1:N_V1
     for j = 1:N_FEF
-        D = D + w(i,j) * MT(i,j); 
+        D = D + W(i,j) * MT(i,j); 
     end
 end
 
@@ -146,7 +145,7 @@ end
 % end:      VERGENCE-TEST
 
 % begin:    MT-TEST
-D = MT;         % returns N_V1 x N_FEF matrix containing all MT node values
+%D = MT(1,5);         % returns 1 x N_FEF vector containing all node values
 % end:      MT-TEST
 
 
